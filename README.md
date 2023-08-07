@@ -4,7 +4,11 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 ## Structure
 
-Atomic design principle is used to set up the application
+Atomic design principle is used to set up the application folder stucture
+
+## Testing
+
+Some basic testing added to one of the helper functions
 
 ## Available Scripts
 
