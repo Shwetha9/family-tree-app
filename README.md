@@ -1,6 +1,10 @@
-# Getting Started with Create React App
+# The Family Tree App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
+## Structure
+
+Atomic design principle is used to set up the application
 
 ## Available Scripts
 
