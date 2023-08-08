@@ -1,10 +1,10 @@
-import { TransformedMember, transformFamily } from '../../helpers/dt-transform'; // Replace with the correct path
-import { findRelation } from '../../helpers/find-relation'; // Replace with the correct path
-import { useState, useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import { Input } from '../atoms/input';
 import { Button } from '../atoms/button';
 import { Card } from '../molecules/search-results';
 import { FamilyContext } from '../templates/family-tree';
+import { TransformedMember, transformFamily } from '../../helpers/dt-transform'; // Replace with the correct path
+import { findRelation } from '../../helpers/find-relation'; // Replace with the correct path
 
 import './organisms.scss';
 import { Family } from '../../models/family-member';
@@ -14,7 +14,8 @@ export const FindMember = (): JSX.Element => {
   const [relation, setRelation] = useState('');
   const [result, setResult] = useState<string[]>([]);
   const [error, setError] = useState('');
-  const family = useContext(FamilyContext); // Using TransformedFamily type
+  const family = useContext<Family | null>(FamilyContext); // Use TransformedMember[] type as the type.
+
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
     setError(''); // Clear the error when the name input changes
@@ -31,7 +32,12 @@ export const FindMember = (): JSX.Element => {
       return;
     }
 
-    const transformedFamilyArray = transformFamily(family as Family);
+    if (!family) {
+      setError('Family data not available.');
+      return;
+    }
+
+    const transformedFamilyArray = transformFamily(family);
     const familyDto: { [name: string]: TransformedMember } = Object.fromEntries(
       transformedFamilyArray.map((member) => [member.name, member])
     );

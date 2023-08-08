@@ -9,7 +9,7 @@ import './family-tree.scss';
 export const FamilyContext = React.createContext<Family | null>(null);
 
 export default function FamilyTree() {
-  const [family, setFamily] = useState<Family>(() => familyData);
+  const [family] = useState<Family>(() => familyData);
 
   return (
     <FamilyContext.Provider value={family}>
