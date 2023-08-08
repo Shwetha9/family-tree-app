@@ -13,27 +13,33 @@ export interface TransformedMember {
 }
 
 export const transformMember = (member: Member, family: Family): TransformedMember => {
-  const uncles =
-    member.parents?.flatMap(
-      (parent) =>
-        family.children?.filter((sibling) => sibling.name !== parent && sibling.gender === 'male').map((uncle) => uncle.name) || []
-    ) || [];
+  const parents = member.parents || [];
+  const parentsWithSiblings = parents.flatMap((parent) => {
+    const parentData = family.children?.find((child) => child.name === parent);
+    return parentData?.siblings || [];
+  });
 
-  const aunts =
-    member.parents?.flatMap(
-      (parent) =>
-        family.children?.filter((sibling) => sibling.name !== parent && sibling.gender === 'female').map((aunt) => aunt.name) || []
-    ) || [];
+  const uncles = parentsWithSiblings
+    .filter((uncle) => family.children?.find((child) => child.name === uncle)?.gender === 'male')
+    .map((uncle) => uncle);
+
+  const aunts = parentsWithSiblings
+    .filter((aunt) => family.children?.find((child) => child.name === aunt)?.gender === 'female')
+    .map((aunt) => aunt);
 
   const nieces =
-    member.children?.flatMap(
-      (child) => child.children?.filter((grandChild) => grandChild.gender === 'female').map((niece) => niece.name) || []
-    ) || [];
+    parentsWithSiblings.length > 0
+      ? member.children?.flatMap(
+          (child) => child.children?.filter((grandChild) => grandChild.gender === 'female').map((niece) => niece.name) || []
+        ) || []
+      : [];
 
   const nephews =
-    member.children?.flatMap(
-      (child) => child.children?.filter((grandChild) => grandChild.gender === 'male').map((nephew) => nephew.name) || []
-    ) || [];
+    parentsWithSiblings.length > 0
+      ? member.children?.flatMap(
+          (child) => child.children?.filter((grandChild) => grandChild.gender === 'male').map((nephew) => nephew.name) || []
+        ) || []
+      : [];
 
   const grandchildren = member.children?.flatMap((child) => child.children?.map((grandChild) => grandChild.name) || []) || [];
 
@@ -41,15 +47,15 @@ export const transformMember = (member: Member, family: Family): TransformedMemb
     name: member.name,
     gender: member.gender,
     spouse: member.spouse || null,
-    parents: member.parents || [],
+    parents,
     siblings: member.siblings || [],
     children: member.children?.map((child) => child.name) || [],
     grandchildren,
     relatives: {
-      uncles: uncles.filter((name): name is string => Boolean(name)),
-      aunts: aunts.filter((name): name is string => Boolean(name)),
-      nieces: nieces.filter((name): name is string => Boolean(name)),
-      nephews: nephews.filter((name): name is string => Boolean(name)),
+      uncles,
+      aunts,
+      nieces: parentsWithSiblings.length > 0 ? nieces.filter((name): name is string => Boolean(name)) : [],
+      nephews: parentsWithSiblings.length > 0 ? nephews.filter((name): name is string => Boolean(name)) : [],
     },
   };
 };
