@@ -11,10 +11,10 @@ export interface Member {
 }
 
 export interface Relative {
-  uncles?: string[];
-  aunts?: string[];
-  nieces?: string[];
-  nephews?: string[];
+  uncles?: string[] | undefined;
+  aunts?: string[] | undefined;
+  nieces?: string[] | undefined;
+  nephews?: string[] | undefined;
 }
 
 export interface Family {

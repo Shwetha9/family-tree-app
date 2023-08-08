@@ -1,47 +1,8 @@
-import { Family, Member } from '../models/family-member';
+import { TransformedMember } from '../helpers/dt-transform';
 
-const findAuntsAndUncles = (target: Member, family: Family, relation: string): string[] => {
-  const relatives: string[] = [];
-  for (const parent of target.parents || []) {
-    for (const child of family.children || []) {
-      if (child.name === parent && child.gender) {
-        if (
-          (relation.toLowerCase() === 'uncles' && child.gender === 'male') ||
-          (relation.toLowerCase() === 'aunts' && child.gender === 'female')
-        ) {
-          relatives.push(...(child.siblings || []));
-        }
-      }
-    }
-  }
-  // Handle empty results
-  if (relatives.length === 0) {
-    throw new Error(`No ${relation} found.`);
-  }
-  return relatives;
-};
-
-export const findRelation = (family: Family, name: string, relation: string): string[] | undefined => {
-  let targetMember: Member | undefined;
-
-  // find the target member in the children of the family
-  if (family.children?.length) {
-    for (const child of family.children) {
-      if (child.name.toLowerCase() === name.toLowerCase() || child.spouse?.toLowerCase() === name.toLowerCase()) {
-        targetMember = child;
-        break;
-      }
-      if (child.children?.length) {
-        for (const grandchild of child.children) {
-          if (grandchild.name.toLowerCase() === name.toLowerCase() || grandchild.spouse?.toLowerCase() === name.toLowerCase()) {
-            targetMember = grandchild;
-
-            break;
-          }
-        }
-      }
-    }
-  }
+export const findRelation = (family: { [name: string]: TransformedMember }, name: string, relation: string): string[] | undefined => {
+  // Find the target member using the name
+  const targetMember = family[name];
 
   if (!targetMember) {
     throw new Error(`No person named ${name} in the family`);
@@ -51,12 +12,15 @@ export const findRelation = (family: Family, name: string, relation: string): st
     case 'parents':
       return targetMember.parents?.filter((parent) => parent !== name);
     case 'children':
-      return targetMember.children?.map((child) => child.name);
+      return targetMember.children;
+    case 'grandchildren':
+      return targetMember.grandchildren;
     case 'siblings':
       return targetMember.siblings?.filter((sibling) => sibling !== name);
     case 'uncles':
+      return targetMember.relatives?.uncles;
     case 'aunts':
-      return findAuntsAndUncles(targetMember, family, relation);
+      return targetMember.relatives?.aunts;
     case 'nieces':
       return targetMember.relatives?.nieces;
     case 'nephews':
